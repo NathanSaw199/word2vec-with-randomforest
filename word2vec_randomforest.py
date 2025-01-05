@@ -9,6 +9,28 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_colwidth', 255)
 
+
+#Step 2: Load the Dataset
+
+#Step 3: Preprocess the Text
+
+#Step 4: Encode Labels
+
+#Step 5: Split the Dataset
+
+#Step 6: Train the Word2Vec Model
+
+#Step 7: Convert Reviews to Sentence Vectors 
+#Retrieve Vocabulary - >Obtain the vocabulary learned by the Word2Vec model.
+#Convert Sentences to Word Vectors - >For each sentence, retrieve vectors for words that exist in the vocabulary.
+#Compute Sentence Vectors (Averages) - > For each sentence, compute the average of the word vectors.
+
+#Step 8: Train a Random Forest Classifier
+
+#Step 9: Make Predictions
+
+#Step 10: Evaluate the Model
+
 df = pd.read_csv(r"C:\Users\Saw\Desktop\GEN_AI\IMDB Dataset.csv")
 
 def remove_tags(raw_text):
@@ -41,31 +63,81 @@ X_train, X_test, y_train,y_test = train_test_split(df["review_clean"],df["label"
 # Train the word2vec model
 w2v_model = gensim.models.Word2Vec(X_train,vector_size=100,window=5,min_count=2)
 
-#Represents all of the words that our Word2Vec model learned a vector for.Or put another way, it’s all of the words that appeared in the training data at least twice. So you can exp
+#Retrieves the vocabulary (all unique words) learned by the Word2Vec model during training.
 w2v_model.wv.index_to_key
 
-#We can find the most similar words based on word vectors from our trained model, let find the most similar words for “king”
-# Find the most similar words to "king" based on word vectors from our trained model
-# print(w2v_model.wv.most_similar('movie'))
-
-#Generate aggregated sentence vectors based on the word vectors for each word in the sentence
-
+#This part of the code converts each sentence in the training and test datasets into arrays of word vectors using the trained Word2Vec model.
+#set(): Converts the list of words into a Python set for faster membership checking (i in words) when processing sentences.
 words = set(w2v_model.wv.index_to_key)
-X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])
-                         for ls in X_train]
+#the variable words now contains all the words in the Word2Vec vocabulary.
+#for ls in X_train: Iterates over each preprocessed review (sentence) in the training dataset X_train. Each ls represents a tokenized sentence (list of words). ls is a list of words (tokens) from a single review
+#X_train = [["movie", "amazing"],["film", "boring", "waste"]] .First iteration: ls = ["movie", "amazing"] .Second iteration: ls = ["film", "boring", "waste"]
+#Iterates over each tokenized sentence (ls) in the training dataset X_train.
+#If a review is "The movie was amazing", after preprocessing: ls = ["movie", "amazing"] 
+#[w2v_model.wv[i] for i in ls if i in words]
+#For each word i in the tokenized sentence ls, check if i is in the words set (i.e., if it has a Word2Vec representation)
+#for i in ls if i in words: For each word i in the sentence ls Check if the word exists in the Word2Vec vocabulary (words) If the word exists, retrieve its vector representation using w2v_model.wv[i].
+#If "movie" and "amazing" exist in the vocabulary. w2v_model.wv["movie"] → [vector representation of "movie"] . 2v_model.wv["amazing"] → [vector representation of "amazing"] 
+#Suppose the Word2Vec model has learned the following vector representations: w2v_model.wv["movie"] = [0.1, 0.3, ..., 0.2]  # A 100-dimensional vector . w2v_model.wv["amazing"] = [0.5, 0.4, ..., 0.1] 
+#For ls = ["movie", "amazing"], the inner list comprehension produces [w2v_model.wv["movie"], w2v_model.wv["amazing"]]
+#Resulting in: [[0.1, 0.3, ..., 0.2],  # Vector for "movie"
+# [0.5, 0.4, ..., 0.1]   # Vector for "amazing"]
+#Convert to NumPy Array: np.array([...]) Converts the list of Word2Vec vectors for the words in a sentence into a NumPy array.Each sentence becomes a 2D array where each row is a 100-dimensional vector representing a word.
+#Example: For ls = ["movie", "amazing"], the result might look like:
+#np.array([
+#     [0.1, 0.3, ..., 0.2],  # Vector for "movie"
+#     [0.5, 0.4, ..., 0.1]   # Vector for "amazing"
+# ])
+#The result is a list of NumPy arrays, where each array represents a tokenized sentence.
+#Each array contains the Word2Vec vectors for the words in that sentence.
+
+
+#STEPS Example
+# X_train = [
+#     ["movie", "amazing"], 
+#     ["film", "boring", "waste"]
+# ]
+#words = {"movie", "amazing", "film", "boring", "waste"}  # Words learned by Word2Vec
+#If the Word2Vec vectors are:
+#w2v_model.wv["movie"] = [0.1, 0.3, ..., 0.2]
+# w2v_model.wv["amazing"] = [0.5, 0.4, ..., 0.1]
+# w2v_model.wv["film"] = [0.2, 0.6, ..., 0.8]
+# w2v_model.wv["boring"] = [0.9, 0.7, ..., 0.3]
+# w2v_model.wv["waste"] = [0.4, 0.2, ..., 0.5]
+#The result of X_train_vect will be:
+# [
+#     np.array([
+#         [0.1, 0.3, ..., 0.2],  # Vector for "movie"
+#         [0.5, 0.4, ..., 0.1]   # Vector for "amazing"
+#     ]),
+#     np.array([
+#         [0.2, 0.6, ..., 0.8],  # Vector for "film"
+#         [0.9, 0.7, ..., 0.3],  # Vector for "boring"
+#         [0.4, 0.2, ..., 0.5]   # Vector for "waste"
+#     ])
+# ]
+X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])for ls in X_train]
+
 X_test_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])
                          for ls in X_test]
-#So we’re going to loop through this array of arrays that we created in the step above. Each sentance have different number of array vectors which may cause an error while we training the model
-# Why is the length of the sentence different than the length of the sentence vector?
-for i, v in enumerate(X_train_vect):
-    print(len(X_train.iloc[i]), len(v))
+
 
 # Compute sentence vectors by averaging the word vectors for the words contained in the sentence
+#This will store the computed sentence vectors for the training data.
 X_train_vect_avg = []
+#Each v represents the NumPy array for a single sentence.v is a 2D array where each row corresponds to the Word2Vec vector of a word in the sentence.
 for v in X_train_vect:
+    #Check If the Sentence Has Word Vectors: v.size checks if the array has any elements.If v is empty (e.g., all words in the sentence are out of vocabulary), proceed to the else block.
     if v.size:
+        #Averages the vectors along the rows (i.e., across words) to produce a single 100-dimensional vector.
         X_train_vect_avg.append(v.mean(axis=0))
     else:
+        #If a sentence has no valid words (e.g., all words are not in the Word2Vec vocabulary), the vector is set to a zero vector of length 100 (matching the dimensionality of Word2Vec vectors).
+        #         v = np.array([
+        #     [0.1, 0.2, 0.3],  # Word 1
+        #     [0.4, 0.5, 0.6]   # Word 2
+        # ])
+        # v.mean(axis=0) = [0.25, 0.35, 0.45]  # Sentence vector
         X_train_vect_avg.append(np.zeros(100, dtype=float))
         
 X_test_vect_avg = []
