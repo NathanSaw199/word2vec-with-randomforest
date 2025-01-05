@@ -31,6 +31,42 @@ pd.set_option('display.max_colwidth', 255)
 
 #Step 10: Evaluate the Model
 
+
+#Word2Vec is a technique used to learn vector representations of words, where semantically similar words are closer together in the vector space. It works through two models: Continuous Bag of Words (CBOW) and Skip-gram. Both models aim to capture word relationships in vector space.
+
+# # Sample corpus
+# sentences = [
+#     ['I', 'love', 'machine', 'learning'],
+#     ['machine', 'learning', 'is', 'fun'],
+#     ['deep', 'learning', 'is', 'a', 'subfield', 'of', 'machine', 'learning'],
+#     ['natural', 'language', 'processing', 'is', 'part', 'of', 'AI'],
+#     ['artificial', 'intelligence', 'includes', 'machine', 'learning']
+# ]
+
+# # Train a Word2Vec model
+# model = Word2Vec(sentences, vector_size=10, window=3, min_count=1, workers=4)
+
+# # Check the vector for the word 'machine'
+# machine_vector = model.wv['machine']
+# print("Vector for 'machine':")
+# print(machine_vector)
+
+# # Check the most similar words to 'machine'
+# similar_words = model.wv.most_similar('machine', topn=3)
+# print("\nMost similar words to 'machine':")
+# for word, similarity in similar_words:
+#     print(f'{word}: {similarity}')
+#After running the code, the output might look like this:
+
+#Vector for 'machine':
+# [ 0.11143001 -0.03993875 -0.08611089 -0.01563149 -0.05126312  0.03250642
+#   0.03649713  0.01177546  0.05558735 -0.07608556]
+
+# Most similar words to 'machine':
+# learning: 0.901234567
+# deep: 0.78934521
+# artificial: 0.76093245
+# The primary focus is on training Word2Vec, generating sentence vectors, and feeding them to a machine learning model for classification. The step to find similar words can be skipped unless you need to investigate or refine the quality of your word embeddings.
 df = pd.read_csv(r"C:\Users\Saw\Desktop\GEN_AI\IMDB Dataset.csv")
 
 def remove_tags(raw_text):
