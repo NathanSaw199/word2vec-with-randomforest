@@ -159,6 +159,17 @@ for v in X_test_vect:
 
 ## Instantiate and fit a basic Random Forest model on top of the vectors
 rf = RandomForestClassifier()
+#y_train.values.ravel() ,Converts y_train into a 1D array: Ensures compatibility with the fit() function, which expects a 1D array for the target values.
+# y_train.values  # Example: [[1], [0], [1], ...] , y_train.values.ravel()  # Output: [1, 0, 1, ...] 
+#Example Imagine the classifier is trained on two sentences: Sentence 1: "The movie was amazing!" → Label: Positive (1) Sentence 2: "The movie was terrible!" → Label: Negative (0)
+#If X_train_vect_avg and y_train look like:
+# X_train_vect_avg = [
+#     [0.2, 0.4, 0.5],  # Vector for "The movie was amazing!"
+#     [0.1, 0.2, 0.3],  # Vector for "The movie was terrible!"
+# ]
+# y_train = [1, 0] 
+#The model will learn:
+#Sentences with vectors closer to [0.2, 0.4, 0.5] are likely positive. Sentences with vectors closer to [0.1, 0.2, 0.3] are likely negative.
 rf_model = rf.fit(X_train_vect_avg,y_train.values.ravel())
 
 #Now that we have our fit model, we’re going to call dot predict on that fit model and use the patterns that it learned in its training process and apply those to unseen text messages in the test data(X_test_vect_avg) and store those predictions in y_pred
