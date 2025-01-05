@@ -116,6 +116,39 @@ words = set(w2v_model.wv.index_to_key)
 #         [0.4, 0.2, ..., 0.5]   # Vector for "waste"
 #     ])
 # ]
+
+# #X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])for ls in X_train]
+# #X_train = [["hello", "world"], ["machine", "learning"]]
+# words = {"hello", "world", "machine", "learning"}
+# w2v_model.wv = {"hello": [1, 2], "world": [3, 4], "machine": [5, 6], "learning": [7, 8]}
+#to Represent Sentence-Level Data Each sentence (ls) in X_train becomes one numpy array of word vectors. Without the outer brackets, you wouldn't retain the separation between sentences, and the sentence structure would be lost.
+#X_train_vect = np.array([w2v_model.wv[i] for i in ls if i in words for ls in X_train]) This would flatten all the word vectors for all sentences into a single numpy array, losing the sentence boundaries.
+
+# X_train = [["hello", "world"], ["machine", "learning"]]
+# words = {"hello", "world", "machine", "learning"}
+# w2v_model.wv = {
+#     "hello": [1, 2],
+#     "world": [3, 4],
+#     "machine": [5, 6],
+#     "learning": [7, 8]
+# }
+#X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words]) for ls in X_train]
+# For ["hello", "world"]:
+# [w2v_model.wv["hello"], w2v_model.wv["world"]] → [[1, 2], [3, 4]]
+# Convert to numpy array: array([[1, 2], [3, 4]])
+# for ["machine", "learning"]:
+# [w2v_model.wv["machine"], w2v_model.wv["learning"]] → [[5, 6], [7, 8]]
+# Convert to numpy array: array([[5, 6], [7, 8]])
+# #X_train_vect = [
+#     array([[1, 2], [3, 4]]),  # Sentence 1
+#     array([[5, 6], [7, 8]])   # Sentence 2
+# ]
+
+#X_train_vect is needed to convert sentences into numerical representations (word embeddings) for machine learning or deep learning models. It organizes word vectors for each sentence into a structured format, preserving sentence-level information.
+X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words]) for ls in X_train]
+# Output: [array([[1, 2], [3, 4]]), array([[5, 6], [7, 8]])]
+X_test_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])
+                         for ls in X_test]
 X_train_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])for ls in X_train]
 
 X_test_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])
@@ -124,6 +157,21 @@ X_test_vect = [np.array([w2v_model.wv[i] for i in ls if i in words])
 
 # Compute sentence vectors by averaging the word vectors for the words contained in the sentence
 #This will store the computed sentence vectors for the training data.
+#X_train_vect_avg is used to create a fixed-length vector for each sentence by averaging the word embeddings
+#Create Fixed-Length Vectors: Sentences can have different numbers of words, resulting in variable-length embeddings. Averaging ensures every sentence is represented by a fixed-length vector.
+#"I love AI."
+#"AI is great."
+# #I" → [0.1, 0.2, 0.3]
+# "love" → [0.4, 0.5, 0.6]
+# "AI" → [0.7, 0.8, 0.9]
+# "is" → [0.1, 0.3, 0.5]
+# "great" → [0.6, 0.7, 0.8]
+# For "I love AI":Average= 
+
+# [0.1+0.4+0.7,0.2+0.5+0.8,0.3+0.6+0.9]/3 =[0.4,0.5,0.6]
+# The vector [0.4, 0.5, 0.6] that represents the sentence "I love AI" is a semantic representation of the sentence in the same vector space as the individual word embeddings.
+# Machine learning models like classification, regression, clustering, etc., require numerical input. Since sentences are made up of words, and words have numerical representations (embeddings), you can represent the sentence as a single vector that encapsulates the meaning of the entire sentence.
+# Instead of feeding a model individual words, you feed it the average vector of the sentence (in this case, [0.4, 0.5, 0.6]).This vector summarizes the entire sentence and is used in models that perform tasks like sentiment analysis, text classification, or even machine translation.Sentences can be of varying lengths, but machine learning models typically expect input data to have a consistent size. Averaging the word embeddings creates a fixed-length vector representation of a sentence, regardless of how many words it contains.In the case of word embeddings, if each word is represented by a vector of size 3, the sentence is now represented by a single 3-dimensional vector, [0.4, 0.5, 0.6].The vector [0.4, 0.5, 0.6] represents the meaning of the sentence "I love AI" in the context of the embedding space, and it is needed because:It serves as a numerical representation of the sentence for machine learning models.It ensures the sentence is represented by a fixed-length vector for consistency in model input.It captures the semantic meaning of the sentence by averaging the meanings of the individual words in the sentence.
 X_train_vect_avg = []
 #Each v represents the NumPy array for a single sentence.v is a 2D array where each row corresponds to the Word2Vec vector of a word in the sentence.
 for v in X_train_vect:
@@ -186,3 +234,4 @@ accuracy = accuracy_score(y_test,y_pred)
 #     round(precision, 3), round(recall, 3), round((y_pred==y_test).sum()/len(y_pred), 3)))
 
 print(precision,recall,accuracy)
+
